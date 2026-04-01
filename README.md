@@ -35,3 +35,12 @@ This project uses AI and automation to:
 
 The full workflow is available here:
 /workflow/funding-intelligence-agent.json
+
+## 🔐 Environment Variables
+
+Create a `.env` file based on `.env.example` and add your credentials:
+
+- OPENAI_API_KEY
+- TAVILY_API_KEY
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
