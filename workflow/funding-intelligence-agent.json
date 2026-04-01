@@ -1,0 +1,583 @@
+{
+  "name": "Funding Opportunity Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        192
+      ],
+      "id": "463f3670-2238-42bb-83f0-8e9f79aa1684",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "9vc6WfHr3jXcxxnp",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the web for real, up-to-date information about funding opportunities, grants, investors, and accelerators. Always use this tool when you need current or factual data.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "search_depth",
+              "value": "advanced"
+            },
+            {
+              "name": "max_results",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        192
+      ],
+      "id": "e6796786-a2ba-4661-9581-6d51e6532bd6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a funding research agent.\n\nUse the tavily_search tool to find real, up-to-date opportunities.\n\nFind up to 10 funding opportunities relevant to:\n1. Investment company (seed funding, investors, accelerators)\n2. Cultural Therapy (grants, mental health funding, partnerships)\n\nFocus on:\n- UK\n- Ghana\n- International if relevant\n\nReturn ONLY valid JSON in this exact format:\n\n{\n  \"run_date\": \"string\",\n  \"weekly_summary\": \"string\",\n  \"opportunities\": [\n    {\n      \"organisation_name\": \"string\",\n      \"opportunity_title\": \"string\",\n      \"opportunity_type\": \"string\",\n      \"for_entity\": \"string\",\n      \"country\": \"string\",\n      \"funding_amount\": \"string\",\n      \"deadline\": \"string\",\n      \"eligibility\": \"string\",\n      \"why_relevant\": \"string\",\n      \"application_link\": \"string\",\n      \"contact_info\": \"string\",\n      \"relevance_score\": number,\n      \"confidence_score\": number,\n      \"notes\": \"string\"\n    }\n  ]\n}\n\nDo not return anything outside of this JSON.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "ff1a40bf-9799-4845-9089-c303f2b2eff3",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wCZxTtXidbjaVTiemTiZD8L0kPXVieS613y44yAnAh8",
+          "mode": "list",
+          "cachedResultName": "funding_opportunities_tracker_template",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wCZxTtXidbjaVTiemTiZD8L0kPXVieS613y44yAnAh8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 298352715,
+          "mode": "list",
+          "cachedResultName": "Opportunities",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wCZxTtXidbjaVTiemTiZD8L0kPXVieS613y44yAnAh8/edit#gid=298352715"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date Found": "={{ $json.date_found }}",
+            "Opportunity Title": "={{ $json.opportunity_title }}",
+            "Opportunity Type": "={{ $json.opportunity_type }}",
+            "For Entity": "={{ $json.for_entity }}",
+            "Country / Region": "={{ $json.country }}",
+            "Funding Amount": "={{ $json.funding_amount }}",
+            "Currency": "={{ $json.currency }}",
+            "Eligibility": "={{ $json.eligibility }}",
+            "Why Relevant": "={{ $json.why_relevant }}",
+            "Application Link": "={{ $json.application_link }}",
+            "Contact Info": "={{ $json.contact_info }}",
+            "Status": "={{ $json.status }}",
+            "Deadline": "={{ $json.deadline }}",
+            "Relevance Score (1-10)": "={{ $json.relevance_score }}",
+            "Confidence Score (1-10)": "={{ $json.relevance_score }}",
+            "Notes": "={{ $json.notes }}",
+            "Days to Deadline": "={{ $json.days_to_deadline }}",
+            "Priority Band": "={{ $json.priority_band }}",
+            "Source URL": "={{ $json.source_url }}",
+            "Week Start": "={{ $json.week_start }}",
+            "Organisation Name": "={{ $json.organisation_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date Found",
+              "displayName": "Date Found",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Week Start",
+              "displayName": "Week Start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Organisation Name",
+              "displayName": "Organisation Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Opportunity Title",
+              "displayName": "Opportunity Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Opportunity Type",
+              "displayName": "Opportunity Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "For Entity",
+              "displayName": "For Entity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Country / Region",
+              "displayName": "Country / Region",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Funding Amount",
+              "displayName": "Funding Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eligibility",
+              "displayName": "Eligibility",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Why Relevant",
+              "displayName": "Why Relevant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Application Link",
+              "displayName": "Application Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contact Info",
+              "displayName": "Contact Info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Relevance Score (1-10)",
+              "displayName": "Relevance Score (1-10)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confidence Score (1-10)",
+              "displayName": "Confidence Score (1-10)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Days to Deadline",
+              "displayName": "Days to Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority Band",
+              "displayName": "Priority Band",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        112
+      ],
+      "id": "54da6436-dea9-4d50-b681-2daf3bbb363a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lHkeC3XdONa1uXsT",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1wCZxTtXidbjaVTiemTiZD8L0kPXVieS613y44yAnAh8",
+          "mode": "list",
+          "cachedResultName": "funding_opportunities_tracker_template",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wCZxTtXidbjaVTiemTiZD8L0kPXVieS613y44yAnAh8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 298352715,
+          "mode": "list",
+          "cachedResultName": "Opportunities",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wCZxTtXidbjaVTiemTiZD8L0kPXVieS613y44yAnAh8/edit#gid=298352715"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        -32
+      ],
+      "id": "2be29201-9139-4e3d-9bf5-a1b0a1ba4668",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lHkeC3XdONa1uXsT",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.output);\n\nconst runDate = parsed.run_date ?? '';\nconst weeklySummary = parsed.weekly_summary ?? '';\nconst opportunities = parsed.opportunities ?? [];\n\nreturn opportunities.map((opp) => {\n  const deadline = opp.deadline ?? '';\n\n  let daysToDeadline = '';\n  if (deadline) {\n    const deadlineDate = new Date(deadline);\n    if (!isNaN(deadlineDate.getTime())) {\n      daysToDeadline = Math.ceil(\n        (deadlineDate - new Date()) / (1000 * 60 * 60 * 24)\n      );\n    }\n  }\n\n  let priorityBand = 'Low';\n  const relevance = Number(opp.relevance_score ?? 0);\n  if (relevance >= 8) {\n    priorityBand = 'High';\n  } else if (relevance >= 6) {\n    priorityBand = 'Medium';\n  }\n\n  return {\n    json: {\n      run_date: runDate,\n      weekly_summary: weeklySummary,\n      date_found: new Date().toISOString(),\n      week_start: new Date().toISOString().slice(0, 10),\n      organisation_name: opp.organisation_name ?? '',\n      opportunity_title: opp.opportunity_title ?? '',\n      opportunity_type: opp.opportunity_type ?? '',\n      for_entity: opp.for_entity ?? '',\n      country: opp.country ?? '',\n      funding_amount: opp.funding_amount ?? '',\n      currency: opp.currency ?? 'GBP',\n      deadline: opp.deadline ?? 'Not clearly stated',\n      eligibility: opp.eligibility ?? '',\n      why_relevant: opp.why_relevant ?? '',\n      application_link: opp.application_link ?? '',\n      contact_info: opp.contact_info ?? '',\n      status: 'New',\n      relevance_score: opp.relevance_score ?? '',\n      confidence_score: opp.confidence_score ?? '',\n      notes: opp.notes ?? 'Auto-added via research agent',\n      days_to_deadline: daysToDeadline,\n      priority_band: priorityBand,\n      source_url: opp.source_url ?? opp.application_link ?? ''\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        64
+      ],
+      "id": "b9ee0a4d-9747-4064-9834-98137e8b49c8",
+      "name": "Split Opportunities"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "7901804b-ebf9-4c4b-8b0d-d7ee222ab9f8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\n\n// Separate incoming items by source node\nconst newItems = inputs.filter(item => item.pairedItem?.input === 0 || item.json.application_link);\nconst existingItems = inputs.filter(item => item.json['Application Link'] || item.json['Organisation Name']);\n\n// Build a set of existing application links from the sheet\nconst existingLinks = new Set(\n  existingItems\n    .map(item => item.json['Application Link'])\n    .filter(link => typeof link === 'string' && link.trim() !== '')\n);\n\n// Keep only opportunities whose application_link is not already in the sheet\nconst deduped = newItems.filter(item => {\n  const link = item.json.application_link;\n  return typeof link === 'string' && link.trim() !== '' && !existingLinks.has(link);\n});\n\nreturn deduped;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        32
+      ],
+      "id": "9c7a4933-8362-4e51-91ec-3efc5caba62c",
+      "name": "DeDuplicate"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// If no new opportunities were found this week\nif (!items.length) {\n  return [\n    {\n      json: {\n        subject: 'Weekly Funding Opportunities Report',\n        body: `Weekly Funding Opportunities Report\n\nRun date: ${new Date().toLocaleDateString('en-GB')}\n\nNo new opportunities were identified this week after deduplication.\n\nNext steps:\n- Keep the workflow running weekly\n- Review the existing tracker for open opportunities\n- Refine scoring criteria if needed`\n      }\n    }\n  ];\n}\n\n// Sort by relevance score descending\nconst sorted = [...items].sort((a, b) => {\n  return Number(b.json.relevance_score || 0) - Number(a.json.relevance_score || 0);\n});\n\n// Top opportunities overall\nconst top = sorted.slice(0, 5);\n\n// Top for Cultural Therapy\nconst culturalTherapy = sorted\n  .filter(item => (item.json.for_entity || '').toLowerCase().includes('cultural therapy'))\n  .slice(0, 3);\n\n// Top for investment company / seed funding side\nconst investment = sorted\n  .filter(item => {\n    const val = (item.json.for_entity || '').toLowerCase();\n    return val.includes('investment') || val.includes('both');\n  })\n  .slice(0, 3);\n\nfunction formatOpportunity(item, index) {\n  const j = item.json;\n  return `${index + 1}. ${j.opportunity_title}\nOrganisation: ${j.organisation_name}\nEntity: ${j.for_entity}\nCountry: ${j.country}\nFunding: ${j.funding_amount} ${j.currency || ''}\nDeadline: ${j.deadline}\nRelevance Score: ${j.relevance_score}\nWhy it matters: ${j.why_relevant}\nLink: ${j.application_link}\n`;\n}\n\nconst bodyParts = [];\n\nbodyParts.push(`Weekly Funding Opportunities Report\n\nRun date: ${new Date().toLocaleDateString('en-GB')}\n\nNew opportunities added this week: ${items.length}\n`);\n\nbodyParts.push(`Top 5 opportunities this week:\n${top.map(formatOpportunity).join('\\n')}`);\n\nif (culturalTherapy.length) {\n  bodyParts.push(`Top Cultural Therapy opportunities:\n${culturalTherapy.map(formatOpportunity).join('\\n')}`);\n}\n\nif (investment.length) {\n  bodyParts.push(`Top investment company opportunities:\n${investment.map(formatOpportunity).join('\\n')}`);\n}\n\nconst urgent = sorted.filter(item => {\n  const d = item.json.days_to_deadline;\n  return typeof d === 'number' && d >= 0 && d <= 14;\n});\n\nif (urgent.length) {\n  bodyParts.push(`Urgent deadlines in the next 14 days:\n${urgent.map(formatOpportunity).join('\\n')}`);\n}\n\nbodyParts.push(`Suggested next actions:\n- Review the top opportunities by relevance\n- Prioritise anything with a deadline within 14 days\n- Begin outreach or application prep for the strongest 2 to 3 options\n- Check the Google Sheet for full tracking details`);\n\nreturn [\n  {\n    json: {\n      subject: `Weekly Funding Opportunities Report - ${new Date().toLocaleDateString('en-GB')}`,\n      body: bodyParts.join('\\n\\n')\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -48
+      ],
+      "id": "79680b57-e877-4e7d-b2a8-d585e8cc783e",
+      "name": "Build Weekly Email"
+    },
+    {
+      "parameters": {
+        "sendTo": "appaubonsu@gmail.com",
+        "subject": "=={{ $json.subject }}",
+        "emailType": "text",
+        "message": "=={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        -48
+      ],
+      "id": "51414cc9-06ff-41e6-91c9-6ddc1fa83db4",
+      "name": "Send a message",
+      "webhookId": "ce0bb4df-69aa-4b19-8a1e-ac1ed907b8b9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mHSLY6IIjQvLMYKO",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "DeDuplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Opportunities": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "DeDuplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeDuplicate": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Weekly Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Weekly Email": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": -1
+  },
+  "versionId": "c933283b-c2a1-4d38-92ee-dc57d3ce7f96",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee746eab8b3c4cd2545fb506b00f6b5c6832939f72ba1e584bcae6fc68804aad"
+  },
+  "id": "D3uXbYZekTPmNEll",
+  "tags": []
+}
